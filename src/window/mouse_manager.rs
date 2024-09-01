@@ -4,6 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use log::debug;
 use winit::{
     event::WindowEvent,
     event::{DeviceId, ElementState, MouseButton, MouseScrollDelta, Touch, TouchPhase},
@@ -238,6 +239,7 @@ impl MouseManager {
     }
 
     fn handle_line_scroll(&mut self, amount: GridVec<f32>, editor_state: &EditorState) {
+        println!("line scroll");
         if !self.enabled {
             return;
         }
@@ -291,6 +293,7 @@ impl MouseManager {
     }
 
     fn handle_pixel_scroll(&mut self, amount: PixelVec<f32>, editor_state: &EditorState) {
+        dbg!("pixel scroll, {}", amount, editor_state.grid_scale);
         let amount = amount / *editor_state.grid_scale;
         self.handle_line_scroll(amount, editor_state);
     }
@@ -302,6 +305,7 @@ impl MouseManager {
         phase: &TouchPhase,
         editor_state: &EditorState,
     ) {
+        println!("touch scroll");
         match phase {
             TouchPhase::Started => {
                 let settings = SETTINGS.get::<WindowSettings>();
@@ -387,6 +391,7 @@ impl MouseManager {
         renderer: &Renderer,
         window: &Window,
     ) {
+        dbg!("{}", event);
         let editor_state = EditorState {
             grid_scale: &renderer.grid_renderer.grid_scale,
             window_regions: &renderer.window_regions,
@@ -411,7 +416,10 @@ impl MouseManager {
             WindowEvent::MouseWheel {
                 delta: MouseScrollDelta::PixelDelta(delta),
                 ..
-            } => self.handle_pixel_scroll((delta.x as f32, delta.y as f32).into(), &editor_state),
+            } => {
+                dbg!("delta {}", delta);
+                self.handle_pixel_scroll((delta.x as f32, delta.y as f32).into(), &editor_state)
+            }
             WindowEvent::Touch(Touch {
                 device_id,
                 id,
